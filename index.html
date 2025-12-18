@@ -192,6 +192,16 @@
                             'FAILED': 2,
                             'NO PLAY': 1
                         };
+                        const djLevelRank = {
+                            'AAA': 8,
+                            'AA': 7,
+                            'A': 6,
+                            'B': 5,
+                            'C': 4,
+                            'D': 3,
+                            'E': 2,
+                            'F': 1
+                        };
 
                         transformedData.sort((a, b) => {
                             let valA = a[header];
@@ -200,6 +210,9 @@
                             if (header === 'Clear Type') {
                                 valA = clearTypeRank[valA.toUpperCase()] || 0;
                                 valB = clearTypeRank[valB.toUpperCase()] || 0;
+                            } else if (header === 'DJ Level') {
+                                valA = djLevelRank[valA.toUpperCase()] || 0;
+                                valB = djLevelRank[valB.toUpperCase()] || 0;
                             } else if (numericHeaders.includes(header)) {
                                 valA = (valA === '---' || valA === '') ? -Infinity : parseInt(valA, 10);
                                 valB = (valB === '---' || valB === '') ? -Infinity : parseInt(valB, 10);
