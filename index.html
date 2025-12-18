@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,43 +9,70 @@
         body {
             font-family: sans-serif;
         }
+
         table {
             border-collapse: collapse;
             width: 100%;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
         }
+
         th {
             background-color: #f2f2f2;
             text-align: left;
             cursor: pointer;
             position: relative;
         }
+
         th.sort-asc::after {
             content: ' ▲';
         }
+
         th.sort-desc::after {
             content: ' ▼';
         }
+
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+
         #filter {
             margin-bottom: 1em;
             padding: 0.5em;
             width: 100%;
             box-sizing: border-box;
         }
-        .clear-type-NO_PLAY { color: black; }
-        .clear-type-EASY_CLEAR { color: green; }
-        .clear-type-CLEAR { color: blue; }
-        .clear-type-HARD_CLEAR { color: red; }
-        .clear-type-EX_HARD_CLEAR { color: lightyellow; }
-        .clear-type-FULLCOMBO_CLEAR { color: violet; }
+
+        .clear-type-NO_PLAY {
+            color: black;
+        }
+
+        .clear-type-EASY_CLEAR {
+            color: green;
+        }
+
+        .clear-type-CLEAR {
+            color: blue;
+        }
+
+        .clear-type-HARD_CLEAR {
+            color: red;
+        }
+
+        .clear-type-EX_HARD_CLEAR {
+            color: lightyellow;
+        }
+
+        .clear-type-FULLCOMBO_CLEAR {
+            color: violet;
+        }
     </style>
 </head>
+
 <body>
 
     <h1>IIDX DP Score Viewer</h1>
@@ -53,9 +81,9 @@
     <pre id="debug" style="display: none;"></pre>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             let transformedData = [];
-            const newHeaders = ['Version', 'Title', 'Score Type', 'Difficulty', 'Score', 'PGreat', 'Great', 'Miss Count', 'Clear Type', 'DJ Level'];
+            const newHeaders = ['Version', 'Title', 'Score Type', 'Score', 'PGreat', 'Great', 'Miss Count', 'Clear Type', 'DJ Level'];
             let currentSort = { header: null, order: '1' };
 
             // Function to parse CSV text
@@ -91,7 +119,6 @@
                                 'Version': row['バージョン'],
                                 'Title': row['タイトル'],
                                 'Score Type': type,
-                                'Difficulty': difficulty,
                                 'Score': row[`${type} スコア`],
                                 'PGreat': row[`${type} PGreat`],
                                 'Great': row[`${type} Great`],
@@ -147,15 +174,15 @@
                 document.querySelectorAll('th').forEach(th => {
                     th.addEventListener('click', () => {
                         const header = th.dataset.sort;
-                        
+
                         if (currentSort.header === header) {
                             currentSort.order = currentSort.order === '1' ? '-1' : '1';
                         } else {
                             currentSort.header = header;
                             currentSort.order = '1';
                         }
-                        
-                        const numericHeaders = ['Difficulty', 'Score', 'PGreat', 'Great', 'Miss Count'];
+
+                        const numericHeaders = ['Score', 'PGreat', 'Great', 'Miss Count'];
 
                         transformedData.sort((a, b) => {
                             let valA = a[header];
@@ -186,10 +213,10 @@
                         return row['Title'] && row['Title'].toLowerCase().includes(filterValue);
                     });
                 }
-                
+
                 renderTable(filteredData, currentSort.header, currentSort.order);
             }
-            
+
             // Fetch and process the CSV data
             fetch('5771-1854_dp_score.csv')
                 .then(response => {
@@ -203,10 +230,10 @@
                         if (csvText.charCodeAt(0) === 0xFEFF) {
                             csvText = csvText.substring(1);
                         }
-                        
+
                         const originalData = parseCSV(csvText);
                         transformedData = transformData(originalData);
-                        
+
                         applyFiltersAndRender();
 
                     } catch (e) {
@@ -226,4 +253,5 @@
         });
     </script>
 </body>
+
 </html>
