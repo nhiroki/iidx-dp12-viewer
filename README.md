@@ -6,7 +6,7 @@ A simple, client-side web application to view and analyze personal beatmania IID
 
 *   **Local Data:** Loads score data from a local CSV file.
 *   **Level 12 Focus:** Automatically filters and displays all of your level 12 DP scores.
-*   **Sortable Table:** Click any column header to sort the data by that metric (e.g., Score, Miss Count, Title).
+*   **Sortable Table:** Click any column header to sort the data. Numeric columns use numeric sorting, while "Clear Type" and "DJ Level" use custom gameplay/rank hierarchies.
 *   **Title Filter:** Instantly filter the list by song title using the search box.
 *   **Color-Coded Clear Types:** Clear lamps are colored for quick visual identification (e.g., EASY CLEAR is green, HARD CLEAR is red).
 *   **Zero Dependencies:** Runs entirely in the browser with vanilla JavaScript. No build step or internet connection required.
@@ -41,4 +41,4 @@ The application expects a CSV file with Japanese headers. Each row represents a 
 *   `BEGINNER クリアタイプ`, `NORMAL クリアタイプ`, etc. (Clear Type for each style)
 *   `BEGINNER DJ LEVEL`, `NORMAL DJ LEVEL`, etc.
 
-The script then transforms this data, creating a new table entry for each difficulty (Beginner, Normal, etc.) that is marked as level 12.
+The script then transforms this data, creating a new table entry for each difficulty chart (Beginner, Normal, etc.) that is marked as level 12. Since the application is specifically for level 12 charts, the "Difficulty" column is omitted from the display.
