@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIDX DP Score Viewer</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+            cursor: pointer;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        #filter {
+            margin-bottom: 1em;
+            padding: 0.5em;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .clear-type-NO_PLAY { color: black; }
+        .clear-type-EASY_CLEAR { color: green; }
+        .clear-type-CLEAR { color: blue; }
+        .clear-type-HARD_CLEAR { color: red; }
+        .clear-type-EX_HARD_CLEAR { color: lightyellow; }
+        .clear-type-FULLCOMBO_CLEAR { color: violet; }
+    </style>
+</head>
+<body>
+
+    <h1>IIDX DP Score Viewer</h1>
+    <input type="text" id="filter" placeholder="Filter by title...">
+    <div id="csv-table"></div>
+    <pre id="debug" style="display: none;"></pre>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let transformedData = [];
+            const newHeaders = ['Version', 'Title', 'Score Type', 'Difficulty', 'Score', 'PGreat', 'Great', 'Miss Count', 'Clear Type', 'DJ Level'];
+
+            // Function to parse CSV text
+            function parseCSV(text) {
+                try {
+                    const lines = text.trim().split(/\r?\n/);
+                    if (lines.length === 0) return [];
+                    const headers = lines.shift().split(',').map(h => h.trim());
+                    return lines.map(line => {
+                        const values = line.split(',');
+                        const obj = {};
+                        headers.forEach((header, i) => {
+                            obj[header] = values[i] ? values[i].trim() : '';
+                        });
+                        return obj;
+                    });
+                } catch (e) {
+                    document.getElementById('debug').textContent = 'Error in parseCSV: ' + e.message;
+                    return [];
+                }
+            }
+
+            // Function to transform the original data
+            function transformData(originalData) {
+                const transformed = [];
+                const difficultyTypes = ['BEGINNER', 'NORMAL', 'HYPER', 'ANOTHER', 'LEGGENDARIA'];
+
+                originalData.forEach(row => {
+                    difficultyTypes.forEach(type => {
+                        const difficulty = row[`${type} 難易度`];
+                        if (difficulty === '12') {
+                            transformed.push({
+                                'Version': row['バージョン'],
+                                'Title': row['タイトル'],
+                                'Score Type': type,
+                                'Difficulty': difficulty,
+                                'Score': row[`${type} スコア`],
+                                'PGreat': row[`${type} PGreat`],
+                                'Great': row[`${type} Great`],
+                                'Miss Count': row[`${type} ミスカウント`],
+                                'Clear Type': row[`${type} クリアタイプ`],
+                                'DJ Level': row[`${type} DJ LEVEL`]
+                            });
+                        }
+                    });
+                });
+                return transformed;
+            }
+
+            // Function to render the table
+            function renderTable(data) {
+                let table = '<table>';
+                // headers
+                table += '<thead><tr>';
+                newHeaders.forEach(header => {
+                    table += `<th data-sort="${header}">${header}</th>`;
+                });
+                table += '</tr></thead>';
+
+                // body
+                table += '<tbody>';
+                data.forEach(row => {
+                    table += '<tr>';
+                    newHeaders.forEach(header => {
+                        let cellContent = row[header] || '';
+                        let cellClass = '';
+                        if (header === 'Clear Type') {
+                            cellClass = 'clear-type-' + cellContent.replace(/ /g, '_');
+                        }
+                        table += `<td class="${cellClass}">${cellContent}</td>`;
+                    });
+                    table += '</tr>';
+                });
+                table += '</tbody>';
+
+                table += '</table>';
+                document.getElementById('csv-table').innerHTML = table;
+
+                // Re-attach sorting event listeners
+                attachSortingEventListeners();
+            }
+
+            // Function to attach sorting event listeners
+            function attachSortingEventListeners() {
+                // Remove existing listeners by replacing elements with clones
+                document.querySelectorAll('th').forEach(oldTh => {
+                    const newTh = oldTh.cloneNode(true);
+                    oldTh.parentNode.replaceChild(newTh, oldTh);
+                });
+
+                // Add new listeners
+                document.querySelectorAll('th').forEach(th => {
+                    th.addEventListener('click', () => {
+                        const header = th.dataset.sort;
+                        const sortOrder = th.dataset.order = (th.dataset.order === '1' ? '-1' : '1');
+                        
+                        const numericHeaders = ['Difficulty', 'Score', 'PGreat', 'Great', 'Miss Count'];
+
+                        transformedData.sort((a, b) => {
+                            let valA = a[header];
+                            let valB = b[header];
+
+                            if (numericHeaders.includes(header)) {
+                                valA = (valA === '---' || valA === '') ? -Infinity : parseInt(valA, 10);
+                                valB = (valB === '---' || valB === '') ? -Infinity : parseInt(valB, 10);
+                            }
+
+                            if (valA < valB) return -1 * parseInt(sortOrder);
+                            if (valA > valB) return 1 * parseInt(sortOrder);
+                            return 0;
+                        });
+                        applyFiltersAndRender();
+                    });
+                });
+            }
+
+            // Function to apply text filter and render
+            function applyFiltersAndRender() {
+                let filteredData = [...transformedData];
+                const filterInput = document.getElementById('filter');
+                const filterValue = filterInput.value.toLowerCase();
+
+                if (filterValue) {
+                    filteredData = filteredData.filter(row => {
+                        return row['Title'] && row['Title'].toLowerCase().includes(filterValue);
+                    });
+                }
+                
+                renderTable(filteredData);
+            }
+            
+            // Fetch and process the CSV data
+            fetch('5771-1854_dp_score.csv')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    try {
+                        if (csvText.charCodeAt(0) === 0xFEFF) {
+                            csvText = csvText.substring(1);
+                        }
+                        
+                        const originalData = parseCSV(csvText);
+                        transformedData = transformData(originalData);
+                        
+                        document.getElementById('debug').textContent = 'Transformed data (first 5 rows):\n' + JSON.stringify(transformedData.slice(0, 5), null, 2);
+                        document.getElementById('debug').style.display = 'none'; // Hide debug after confirming data
+
+                        applyFiltersAndRender();
+
+                    } catch (e) {
+                        document.getElementById('debug').textContent = 'An error occurred during data processing: ' + e.message + '\n' + e.stack;
+                    }
+                })
+                .catch(e => {
+                    document.getElementById('debug').textContent = 'An error occurred fetching the CSV file: ' + e.message;
+                });
+
+            // Event listener for the filter input
+            const filterInput = document.getElementById('filter');
+            filterInput.addEventListener('keyup', applyFiltersAndRender);
+
+        });
+    </script>
+</body>
+</html>
