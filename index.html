@@ -20,6 +20,13 @@
             background-color: #f2f2f2;
             text-align: left;
             cursor: pointer;
+            position: relative;
+        }
+        th.sort-asc::after {
+            content: ' ▲';
+        }
+        th.sort-desc::after {
+            content: ' ▼';
         }
         tr:nth-child(even) {
             background-color: #f9f9f9;
@@ -49,6 +56,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             let transformedData = [];
             const newHeaders = ['Version', 'Title', 'Score Type', 'Difficulty', 'Score', 'PGreat', 'Great', 'Miss Count', 'Clear Type', 'DJ Level'];
+            let currentSort = { header: null, order: '1' };
 
             // Function to parse CSV text
             function parseCSV(text) {
@@ -98,12 +106,16 @@
             }
 
             // Function to render the table
-            function renderTable(data) {
+            function renderTable(data, sortHeader, sortOrder) {
                 let table = '<table>';
                 // headers
                 table += '<thead><tr>';
                 newHeaders.forEach(header => {
-                    table += `<th data-sort="${header}">${header}</th>`;
+                    let sortClass = '';
+                    if (header === sortHeader) {
+                        sortClass = sortOrder === '1' ? 'sort-asc' : 'sort-desc';
+                    }
+                    table += `<th class="${sortClass}" data-sort="${header}">${header}</th>`;
                 });
                 table += '</tr></thead>';
 
@@ -132,17 +144,16 @@
 
             // Function to attach sorting event listeners
             function attachSortingEventListeners() {
-                // Remove existing listeners by replacing elements with clones
-                document.querySelectorAll('th').forEach(oldTh => {
-                    const newTh = oldTh.cloneNode(true);
-                    oldTh.parentNode.replaceChild(newTh, oldTh);
-                });
-
-                // Add new listeners
                 document.querySelectorAll('th').forEach(th => {
                     th.addEventListener('click', () => {
                         const header = th.dataset.sort;
-                        const sortOrder = th.dataset.order = (th.dataset.order === '1' ? '-1' : '1');
+                        
+                        if (currentSort.header === header) {
+                            currentSort.order = currentSort.order === '1' ? '-1' : '1';
+                        } else {
+                            currentSort.header = header;
+                            currentSort.order = '1';
+                        }
                         
                         const numericHeaders = ['Difficulty', 'Score', 'PGreat', 'Great', 'Miss Count'];
 
@@ -155,8 +166,8 @@
                                 valB = (valB === '---' || valB === '') ? -Infinity : parseInt(valB, 10);
                             }
 
-                            if (valA < valB) return -1 * parseInt(sortOrder);
-                            if (valA > valB) return 1 * parseInt(sortOrder);
+                            if (valA < valB) return -1 * parseInt(currentSort.order);
+                            if (valA > valB) return 1 * parseInt(currentSort.order);
                             return 0;
                         });
                         applyFiltersAndRender();
@@ -176,7 +187,7 @@
                     });
                 }
                 
-                renderTable(filteredData);
+                renderTable(filteredData, currentSort.header, currentSort.order);
             }
             
             // Fetch and process the CSV data
@@ -196,17 +207,16 @@
                         const originalData = parseCSV(csvText);
                         transformedData = transformData(originalData);
                         
-                        document.getElementById('debug').textContent = 'Transformed data (first 5 rows):\n' + JSON.stringify(transformedData.slice(0, 5), null, 2);
-                        document.getElementById('debug').style.display = 'none'; // Hide debug after confirming data
-
                         applyFiltersAndRender();
 
                     } catch (e) {
                         document.getElementById('debug').textContent = 'An error occurred during data processing: ' + e.message + '\n' + e.stack;
+                        document.getElementById('debug').style.display = 'block';
                     }
                 })
                 .catch(e => {
                     document.getElementById('debug').textContent = 'An error occurred fetching the CSV file: ' + e.message;
+                    document.getElementById('debug').style.display = 'block';
                 });
 
             // Event listener for the filter input
