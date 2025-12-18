@@ -183,12 +183,24 @@
                         }
 
                         const numericHeaders = ['Score', 'PGreat', 'Great', 'Miss Count'];
+                        const clearTypeRank = {
+                            'FULLCOMBO CLEAR': 7,
+                            'EX HARD CLEAR': 6,
+                            'HARD CLEAR': 5,
+                            'CLEAR': 4,
+                            'EASY CLEAR': 3,
+                            'FAILED': 2,
+                            'NO PLAY': 1
+                        };
 
                         transformedData.sort((a, b) => {
                             let valA = a[header];
                             let valB = b[header];
 
-                            if (numericHeaders.includes(header)) {
+                            if (header === 'Clear Type') {
+                                valA = clearTypeRank[valA.toUpperCase()] || 0;
+                                valB = clearTypeRank[valB.toUpperCase()] || 0;
+                            } else if (numericHeaders.includes(header)) {
                                 valA = (valA === '---' || valA === '') ? -Infinity : parseInt(valA, 10);
                                 valB = (valB === '---' || valB === '') ? -Infinity : parseInt(valB, 10);
                             }
