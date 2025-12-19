@@ -1,31 +1,37 @@
 # IIDX DP Score Viewer
 
-A simple, client-side web application to view and analyze personal beatmania IIDX Double Play (DP) score data. It is designed to parse a specific CSV format and display all level 12 charts in a filterable and sortable table.
+A simple, client-side web application to view and analyze personal beatmania IIDX Double Play (DP) score data. It parses your CSV exported score data and displays all level 12 charts in a filterable and sortable table.
 
 ## Features
 
-*   **Local Data:** Loads score data from a local CSV file.
+*   **Browser-Based Storage:** Stores your score data securely in your browser's Local Storage. No data is ever uploaded to a server.
+*   **Easy Import:** Dedicated upload page supports copy-pasting text or drag-and-dropping CSV files.
+*   **Encoding Support:** Handles both UTF-8 (modern) and Shift-JIS (legacy/Japanese environment) CSV files.
+*   **Robust Parsing:** Correctly handles complex CSVs (e.g., song titles with commas or quoted fields).
 *   **Level 12 Focus:** Automatically filters and displays all of your level 12 DP scores.
-*   **Sortable Table:** Click any column header to sort the data. Numeric columns use numeric sorting, while "Clear Type" and "DJ Level" use custom gameplay/rank hierarchies.
-*   **Title Filter:** Instantly filter the list by song title using the search box.
-*   **Color-Coded Clear Types:** Clear lamps are colored for quick visual identification (e.g., EASY CLEAR is green, HARD CLEAR is red).
+*   **Sortable Table:** Click any column header to sort. "Clear Type" and "DJ Level" use custom gameplay hierarchies.
+*   **Title Filter:** Instantly filter the list by song title.
+*   **Color-Coded Clear Types:** Clear lamps are colored for quick visual identification.
 *   **Zero Dependencies:** Runs entirely in the browser with vanilla JavaScript. No build step or internet connection required.
 
 ## How to Use
 
-1.  **Get Your Score Data:** You need a CSV file containing your score data. The application is designed to work with a specific format where each row represents a song and columns contain the details for each difficulty chart (Beginner, Normal, Hyper, Another, Leggendaria).
+1.  **Open the Viewer:**
+    Open `index.html` in any modern web browser.
 
-2.  **Add Your CSV File:**
-    *   Place your score CSV file in the same directory as `index.html`.
-    *   The application is currently hardcoded to fetch the file named `5771-1854_dp_score.csv`.
-    *   To use your own file, you can either:
-        a. Rename your file to `5771-1854_dp_score.csv`.
-        b. **(Recommended)** Open `index.html` in a text editor and change the filename in this line (around line 170):
-           ```javascript
-           fetch('your-file-name.csv')
-           ```
+2.  **Import Data:**
+    *   If you haven't loaded data yet, you will see a prompt to upload your scores.
+    *   Click the **"Upload CSV Data"** link or navigate to `upload.html`.
+    *   **Drag & Drop** your CSV file into the box, or **Copy & Paste** the text content directly.
+    *   Select the correct encoding (default is UTF-8, use Shift-JIS for older Japanese CSV exports).
+    *   Click **"Save Data"**.
 
-3.  **View Your Scores:** Open `index.html` in any modern web browser.
+3.  **View Your Scores:**
+    You will be redirected back to the main viewer where your level 12 scores are displayed.
+
+4.  **Manage Data:**
+    *   To update your scores, simply go back to the upload page and save new data (it overwrites the old data).
+    *   To remove all data from your browser, use the **"Clear Data"** button on the upload page.
 
 ## CSV Data Format
 
@@ -41,4 +47,4 @@ The application expects a CSV file with Japanese headers. Each row represents a 
 *   `BEGINNER クリアタイプ`, `NORMAL クリアタイプ`, etc. (Clear Type for each style)
 *   `BEGINNER DJ LEVEL`, `NORMAL DJ LEVEL`, etc.
 
-The script then transforms this data, creating a new table entry for each difficulty chart (Beginner, Normal, etc.) that is marked as level 12. Since the application is specifically for level 12 charts, the "Difficulty" column is omitted from the display.
+The script transforms this data, creating a new table entry for each difficulty chart marked as level 12. Since the application is specifically for level 12 charts, the "Difficulty" column is omitted from the display.

@@ -76,6 +76,7 @@
 <body>
 
     <h1>IIDX DP Score Viewer</h1>
+    <p><a href="upload.html">Update Data</a></p>
     <input type="text" id="filter" placeholder="Filter by title...">
     <div id="csv-table"></div>
     <pre id="debug" style="display: none;"></pre>
@@ -86,17 +87,48 @@
             const newHeaders = ['Version', 'Title', 'Score Type', 'Score', 'PGreat', 'Great', 'Miss Count', 'Clear Type', 'DJ Level'];
             let currentSort = { header: null, order: '1' };
 
-            // Function to parse CSV text
+            // Function to parse CSV text (Robust)
             function parseCSV(text) {
                 try {
                     const lines = text.trim().split(/\r?\n/);
                     if (lines.length === 0) return [];
-                    const headers = lines.shift().split(',').map(h => h.trim());
+
+                    // Helper to split line by comma, respecting quotes
+                    const splitLine = (line) => {
+                        const values = [];
+                        let current = '';
+                        let inQuote = false;
+                        for (let i = 0; i < line.length; i++) {
+                            const char = line[i];
+                            if (char === '"') {
+                                inQuote = !inQuote;
+                            } else if (char === ',' && !inQuote) {
+                                values.push(current.trim());
+                                current = '';
+                            } else {
+                                current += char;
+                            }
+                        }
+                        values.push(current.trim());
+
+                        // additional cleanup for quotes: remove surrounding quotes if present
+                        return values.map(val => {
+                            if (val.startsWith('"') && val.endsWith('"')) {
+                                val = val.slice(1, -1);
+                                // handle escaped quotes ("") -> (")
+                                val = val.replace(/""/g, '"');
+                            }
+                            return val;
+                        });
+                    };
+
+                    const headers = splitLine(lines.shift());
+
                     return lines.map(line => {
-                        const values = line.split(',');
+                        const values = splitLine(line);
                         const obj = {};
                         headers.forEach((header, i) => {
-                            obj[header] = values[i] ? values[i].trim() : '';
+                            obj[header] = values[i] !== undefined ? values[i] : '';
                         });
                         return obj;
                     });
@@ -242,34 +274,32 @@
                 renderTable(filteredData, currentSort.header, currentSort.order);
             }
 
-            // Fetch and process the CSV data
-            fetch('5771-1854_dp_score.csv')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+            // Load data from Local Storage
+            const storedData = localStorage.getItem('iidx_score_csv');
+
+            if (storedData) {
+                try {
+                    let csvText = storedData;
+                    if (csvText.charCodeAt(0) === 0xFEFF) {
+                        csvText = csvText.substring(1);
                     }
-                    return response.text();
-                })
-                .then(csvText => {
-                    try {
-                        if (csvText.charCodeAt(0) === 0xFEFF) {
-                            csvText = csvText.substring(1);
-                        }
 
-                        const originalData = parseCSV(csvText);
-                        transformedData = transformData(originalData);
+                    const originalData = parseCSV(csvText);
+                    transformedData = transformData(originalData);
 
+                    if (transformedData.length === 0) {
+                        document.getElementById('csv-table').innerHTML = '<p>No Level 12 data found in the uploaded CSV. <a href="upload.html">Upload a different file?</a></p>';
+                    } else {
                         applyFiltersAndRender();
-
-                    } catch (e) {
-                        document.getElementById('debug').textContent = 'An error occurred during data processing: ' + e.message + '\n' + e.stack;
-                        document.getElementById('debug').style.display = 'block';
                     }
-                })
-                .catch(e => {
-                    document.getElementById('debug').textContent = 'An error occurred fetching the CSV file: ' + e.message;
+
+                } catch (e) {
+                    document.getElementById('debug').textContent = 'An error occurred during data processing: ' + e.message + '\n' + e.stack;
                     document.getElementById('debug').style.display = 'block';
-                });
+                }
+            } else {
+                document.getElementById('csv-table').innerHTML = '<p>No data found. Please <a href="upload.html">upload your score CSV file</a>.</p>';
+            }
 
             // Event listener for the filter input
             const filterInput = document.getElementById('filter');
