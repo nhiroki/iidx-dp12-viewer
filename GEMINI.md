@@ -15,3 +15,8 @@ This helps in tracking the origin of code contributions and maintains consistenc
 ## Documentation Maintenance:
 
 *   **Update README**: Ensure that `README.md` is updated to reflect the current state of the project with every code change. If a feature is added, removed, or modified, the documentation must be immediately updated to match reality.
+
+## Security and Privacy:
+
+*   **Privacy First**: Always prefer client-side solutions (e.g., `localStorage`) over server-side storage for calling sensitive user data.
+*   **Input Sanitization**: When rendering user-provided content (like CSV data), valid HTML escaping must be applied to prevent XSS attacks. Verify this by creating a test case with malicious input.

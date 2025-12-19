@@ -5,6 +5,7 @@ A simple, client-side web application to view and analyze personal beatmania IID
 ## Features
 
 *   **Browser-Based Storage:** Stores your score data securely in your browser's Local Storage. No data is ever uploaded to a server.
+*   **Secure & Private:** Input data is sanitized to prevent XSS attacks, ensuring your local environment remains safe.
 *   **Easy Import:** Dedicated upload page supports copy-pasting text or drag-and-dropping CSV files.
 
 *   **Robust Parsing:** Correctly handles complex CSVs (e.g., song titles with commas or quoted fields).
