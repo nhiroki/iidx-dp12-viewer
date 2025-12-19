@@ -1,4 +1,4 @@
-# IIDX DP Score Viewer
+# IIDX DP12 Score Viewer
 
 A simple, client-side web application to view and analyze personal beatmania IIDX Double Play (DP) score data. It parses your CSV exported score data and displays all level 12 charts in a filterable and sortable table.
 
