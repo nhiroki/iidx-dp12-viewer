@@ -164,6 +164,17 @@
                 return transformed;
             }
 
+            // Helper to escape HTML to prevent XSS
+            function escapeHTML(str) {
+                if (typeof str !== 'string') return str;
+                return str
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
             // Function to render the table
             function renderTable(data, sortHeader, sortOrder) {
                 let table = '<table>';
@@ -188,7 +199,8 @@
                         if (header === 'Clear Type') {
                             cellClass = 'clear-type-' + cellContent.replace(/ /g, '_');
                         }
-                        table += `<td class="${cellClass}">${cellContent}</td>`;
+                        // Sanitize content before rendering
+                        table += `<td class="${cellClass}">${escapeHTML(cellContent)}</td>`;
                     });
                     table += '</tr>';
                 });
