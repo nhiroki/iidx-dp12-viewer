@@ -156,13 +156,7 @@
                 server.</em>
         </p>
 
-        <div style="margin-bottom: 10px; text-align: left;">
-            <label for="encoding-select">File Encoding:</label>
-            <select id="encoding-select">
-                <option value="UTF-8">UTF-8 (Default)</option>
-                <option value="Shift_JIS">Shift-JIS (Legacy/Japanese)</option>
-            </select>
-        </div>
+
 
         <div id="drop-zone">
             Drag & Drop CSV file here or Click to Upload
@@ -199,7 +193,6 @@
         const saveBtn = document.getElementById('save-btn');
         const errorMsg = document.getElementById('error-msg');
         const successMsg = document.getElementById('success-msg');
-        const encodingSelect = document.getElementById('encoding-select');
 
         // Drag and Drop handlers
         dropZone.addEventListener('click', () => fileInput.click());
@@ -234,7 +227,6 @@
                 return;
             }
 
-            const encoding = encodingSelect.value;
             const reader = new FileReader();
             reader.onload = (e) => {
                 csvInput.value = e.target.result;
@@ -244,7 +236,7 @@
             reader.onerror = () => {
                 showError("Error reading file.");
             };
-            reader.readAsText(file, encoding);
+            reader.readAsText(file); // Defaults to UTF-8
         }
 
         function showError(msg) {

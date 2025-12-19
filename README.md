@@ -6,7 +6,7 @@ A simple, client-side web application to view and analyze personal beatmania IID
 
 *   **Browser-Based Storage:** Stores your score data securely in your browser's Local Storage. No data is ever uploaded to a server.
 *   **Easy Import:** Dedicated upload page supports copy-pasting text or drag-and-dropping CSV files.
-*   **Encoding Support:** Handles both UTF-8 (modern) and Shift-JIS (legacy/Japanese environment) CSV files.
+
 *   **Robust Parsing:** Correctly handles complex CSVs (e.g., song titles with commas or quoted fields).
 *   **Level 12 Focus:** Automatically filters and displays all of your level 12 DP scores.
 *   **Sortable Table:** Click any column header to sort. "Clear Type" and "DJ Level" use custom gameplay hierarchies.
@@ -23,7 +23,7 @@ A simple, client-side web application to view and analyze personal beatmania IID
     *   If you haven't loaded data yet, you will see a prompt to upload your scores.
     *   Click the **"Upload CSV Data"** link or navigate to `upload.html`.
     *   **Drag & Drop** your CSV file into the box, or **Copy & Paste** the text content directly.
-    *   Select the correct encoding (default is UTF-8, use Shift-JIS for older Japanese CSV exports).
+
     *   Click **"Save Data"**.
 
 3.  **View Your Scores:**
