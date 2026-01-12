@@ -70,6 +70,43 @@
         .clear-type-FULLCOMBO_CLEAR {
             color: violet;
         }
+
+        #stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #dee2e6;
+        }
+
+        .stat-label {
+            margin-right: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .stat-count {
+            background-color: #007bff;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -77,6 +114,10 @@
 
     <h1>IIDX DP12 Score Viewer</h1>
     <p><a href="upload.html">Update Data</a></p>
+
+    <!-- Stats Container -->
+    <div id="stats-container"></div>
+
     <input type="text" id="filter" placeholder="Filter by title...">
     <div id="csv-table"></div>
     <pre id="debug" style="display: none;"></pre>
@@ -162,6 +203,63 @@
                     });
                 });
                 return transformed;
+            }
+
+            // Calculate Stats
+            function calculateStats(data) {
+                const stats = {
+                    'FULLCOMBO CLEAR': 0,
+                    'EX HARD CLEAR': 0,
+                    'HARD CLEAR': 0,
+                    'CLEAR': 0,
+                    'EASY CLEAR': 0,
+                    'ASSIST CLEAR': 0,
+                    'FAILED': 0,
+                    'NO PLAY': 0
+                };
+
+                // Track total to ensure we capture unexpected types too if needed, 
+                // but for now let's stick to known types or initialize dynamically?
+                // Standard IIDX clear types are fixed.
+
+                data.forEach(row => {
+                    const type = row['Clear Type'] ? row['Clear Type'].toUpperCase() : 'NO PLAY';
+                    if (stats.hasOwnProperty(type)) {
+                        stats[type]++;
+                    } else {
+                        // Handle unexpected types or just ignore
+                        if (!stats['Other']) stats['Other'] = 0;
+                        stats['Other']++;
+                    }
+                });
+                return stats;
+            }
+
+            function renderStats(stats) {
+                const container = document.getElementById('stats-container');
+                let html = '';
+
+                // Define order
+                const order = ['FULLCOMBO CLEAR', 'EX HARD CLEAR', 'HARD CLEAR', 'CLEAR', 'EASY CLEAR', 'ASSIST CLEAR', 'FAILED', 'NO PLAY', 'Other'];
+
+                order.forEach(type => {
+                    if (stats[type] > 0) {
+                        // Get color class for label styling match if desired, or keep generic
+                        const cleanType = type.replace(/ /g, '_');
+                        html += `
+                            <div class="stat-item">
+                                <span class="stat-label clear-type-${cleanType}">${type}</span>
+                                <span class="stat-count">${stats[type]}</span>
+                            </div>
+                         `;
+                    }
+                });
+
+                // Total count
+                // const total = Object.values(stats).reduce((a, b) => a + b, 0);
+                // html += `<div class="stat-item"><span class="stat-label">Total</span><span class="stat-count">${total}</span></div>`;
+
+                container.innerHTML = html;
             }
 
             // Helper to escape HTML to prevent XSS
@@ -283,6 +381,10 @@
                     });
                 }
 
+                // Calculate and render stats based on FILTERED data
+                const stats = calculateStats(filteredData);
+                renderStats(stats);
+
                 renderTable(filteredData, currentSort.header, currentSort.order);
             }
 
@@ -301,6 +403,7 @@
 
                     if (transformedData.length === 0) {
                         document.getElementById('csv-table').innerHTML = '<p>No Level 12 data found in the uploaded CSV. <a href="upload.html">Upload a different file?</a></p>';
+                        document.getElementById('stats-container').innerHTML = ''; // Clear stats if no data
                     } else {
                         applyFiltersAndRender();
                     }
@@ -309,8 +412,9 @@
                     document.getElementById('debug').textContent = 'An error occurred during data processing: ' + e.message + '\n' + e.stack;
                     document.getElementById('debug').style.display = 'block';
                 }
-            } else {
+            } else { // No data found logic - updated to clear stats
                 document.getElementById('csv-table').innerHTML = '<p>No data found. Please <a href="upload.html">upload your score CSV file</a>.</p>';
+                document.getElementById('stats-container').innerHTML = '';
             }
 
             // Event listener for the filter input

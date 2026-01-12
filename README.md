@@ -12,6 +12,7 @@ A simple, client-side web application to view and analyze personal beatmania IID
 *   **Level 12 Focus:** Automatically filters and displays all of your level 12 DP scores.
 *   **Sortable Table:** Click any column header to sort. "Clear Type" and "DJ Level" use custom gameplay hierarchies.
 *   **Title Filter:** Instantly filter the list by song title.
+*   **Clear Type Statistics:** Displays a summary of your clear counts (e.g., number of FULLCOMBO, HARD, etc.) at the top of the list.
 *   **Color-Coded Clear Types:** Clear lamps are colored for quick visual identification.
 *   **Zero Dependencies:** Runs entirely in the browser with vanilla JavaScript. No build step or internet connection required.
 
